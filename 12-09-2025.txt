@@ -1,0 +1,61 @@
+**************************************12-09-2025**********************************************
+
+SET LONG 1000
+SET PAGESIZE 100
+SET LINESIZE 200
+
+
+get detail of view
+SELECT 
+    ao.OWNER,
+    ao.OBJECT_NAME AS VIEW_NAME,
+    ao.CREATED AS CREATION_DATE,
+    ao.STATUS,
+    av.TEXT AS VIEW_QUERY
+FROM 
+    ALL_OBJECTS ao,
+    ALL_VIEWS av
+WHERE 
+    ao.OBJECT_TYPE = 'VIEW'
+    AND ao.OBJECT_NAME = 'ACCOUNT_SUMMARY'
+    AND av.VIEW_NAME = ao.OBJECT_NAME;
+
+
+
+************************************Employee table *******************************************
+CREATE TABLE EMPLOYEES (
+    EMP_ID NUMBER PRIMARY KEY,
+    NAME VARCHAR2(50),
+    SALARY NUMBER,
+    DEPT_ID NUMBER
+);
+
+
+
+CREATE VIEW emp_summary AS
+SELECT EMP_ID, NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY > 5000;
+
+
+UPDATE emp_summary
+SET SALARY = 6800 
+WHERE EMP_ID = 102;
+
+
+
+INSERT INTO emp_summary (EMP_ID, NAME, SALARY)
+VALUES (104, 'David', 7000);
+
+
+DELETE FROM emp_summary
+WHERE EMP_ID = 102;
+
+
+*******************************************Create view read only******************************************
+CREATE VIEW high_salary_employees AS
+SELECT EMP_ID, NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY > 5000
+WITH READ ONLY;
+
