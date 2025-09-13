@@ -1,0 +1,4 @@
+exp mca5/mcauser@orcl19  owner=mca5 file=My-file-data.dmp  log=my-file-data.log
+
+
+imp mca5/mcauser@orcl19 fromuser=mca5  touser=mca6  file=My-file-data.dmp log=import_into_mca6.log

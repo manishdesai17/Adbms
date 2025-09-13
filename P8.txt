@@ -1,0 +1,147 @@
+*****************create type**********************
+
+CREATE OR REPLACE TYPE subjectList AS VARRAY(10) OF VARCHAR2(50);
+
+
+*****************create table **********************
+
+CREATE TABLE Student (
+    s_id   NUMBER PRIMARY KEY,
+    s_name VARCHAR2(50),
+    subjects subjectList
+);
+
+**************sequence**********************
+
+CREATE SEQUENCE student_seq
+START WITH 1
+INCREMENT BY 1;
+
+******************trigger*********************
+
+CREATE OR REPLACE TRIGGER student_before_insert
+BEFORE INSERT ON Student
+FOR EACH ROW
+BEGIN
+    IF :NEW.s_id IS NULL THEN
+        SELECT student_seq.NEXTVAL INTO :NEW.s_id FROM dual;
+    END IF;
+END;
+/
+
+
+
+*******************  insert ***********************
+
+CREATE OR REPLACE PROCEDURE insert_student(
+    p_name    IN VARCHAR2,
+    p_subjects IN subjectList
+) AS
+BEGIN
+    INSERT INTO Student (s_name, subjects)
+    VALUES (p_name, p_subjects);
+
+    DBMS_OUTPUT.PUT_LINE('Student inserted successfully');
+END;
+/
+
+EXEC insert_student('Manish Desai', subjectList('DBMS','Java'));
+
+
+********************** Add perticuler course***************************
+
+CREATE OR REPLACE PROCEDURE add_student_subject(
+    p_id     IN NUMBER,
+    p_subject IN VARCHAR2
+) IS
+    v_subjects subjectList;
+BEGIN
+    SELECT subjects INTO v_subjects
+    FROM Student
+    WHERE s_id = p_id;
+
+    v_subjects.EXTEND;
+    v_subjects(v_subjects.COUNT) := p_subject;
+
+    UPDATE Student
+    SET subjects = v_subjects
+    WHERE s_id = p_id;
+
+    DBMS_OUTPUT.PUT_LINE('Subject added: ' || p_subject);
+END;
+/
+
+EXEC add_student_subject(1,'Python');
+
+
+
+********************  update  ********************
+CREATE OR REPLACE PROCEDURE update_student_subject(
+    p_id   IN NUMBER,
+    p_pos  IN NUMBER,
+    p_name IN VARCHAR2
+) IS
+    v_subjects subjectList;
+BEGIN
+    SELECT subjects INTO v_subjects
+    FROM Student
+    WHERE s_id = p_id;
+
+    IF v_subjects IS NOT NULL AND p_pos BETWEEN 1 AND v_subjects.COUNT THEN
+        v_subjects(p_pos) := p_name;
+
+        UPDATE Student
+        SET subjects = v_subjects
+        WHERE s_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Updated successfully');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot update.');
+    END IF;
+END update_student_subject;
+/
+
+
+QUERY==EXEC update_student_subject(1,1,'Operating System');
+
+
+***************************delete ***********************
+
+CREATE OR REPLACE PROCEDURE delete_student_subject(
+    p_id   IN NUMBER,
+    p_pos  IN NUMBER
+) IS
+    v_subjects subjectList;
+BEGIN
+    SELECT subjects INTO v_subjects
+    FROM Student
+    WHERE s_id = p_id;
+
+    IF v_subjects IS NOT NULL AND p_pos BETWEEN 1 AND v_subjects.COUNT THEN
+        FOR i IN p_pos .. v_subjects.COUNT-1 LOOP
+            v_subjects(i) := v_subjects(i+1);
+        END LOOP;
+        v_subjects.TRIM;
+       
+        UPDATE Student
+        SET subjects = v_subjects
+        WHERE s_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Deleted subject at position ' || p_pos);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot delete.');
+    END IF;
+END delete_student_subject;
+/
+
+@Query ==EXEC delete_student_subject(1,2);
+
+
+
+
+ Format 
+COLUMN S_ID FORMAT 9999
+COLUMN S_NAME FORMAT A30
+COLUMN SUBJECTS FORMAT A50;
+
+SELECT * FROM Student;

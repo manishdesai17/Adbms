@@ -1,0 +1,136 @@
+******************Nested table**************
+CREATE OR REPLACE TYPE skillList IS TABLE OF VARCHAR2(50);
+
+
+****************table****************
+CREATE TABLE Staff (
+    s_id    NUMBER PRIMARY KEY,
+    s_name  VARCHAR2(50),
+    skills  skillList
+)
+STORAGE (INITIAL 5K NEXT 10K)
+NESTED TABLE skills STORE AS Skill_List;
+
+
+
+******************trigger*********************
+
+CREATE OR REPLACE TRIGGER staff_before_insert
+BEFORE INSERT ON Staff
+FOR EACH ROW
+BEGIN
+    IF :NEW.s_id IS NULL THEN
+        SELECT staff_seq.NEXTVAL INTO :NEW.s_id FROM dual;
+    END IF;
+END;
+/
+
+***************insert**********************
+
+   p_name IN VARCHAR2,
+   p_skills IN skillList
+) AS
+BEGIN
+   INSERT INTO Staff (s_name, skills)
+   VALUES (p_name, p_skills);
+   DBMS_OUTPUT.PUT_LINE('Staff inserted successfully');
+END;
+/
+
+EXEC insert_staff('Manish Desai', skillList('Java','DBMS','Spring Boot'));
+
+
+********************** Add perticuler mobile number***************************
+
+CREATE OR REPLACE PROCEDURE add_staff_skill(
+    p_id      IN NUMBER,
+    p_skill   IN VARCHAR2
+) IS
+    v_skills skillList;  
+BEGIN
+    SELECT skills INTO v_skills
+    FROM Staff
+    WHERE s_id = p_id;
+
+    v_skills.EXTEND;
+    v_skills(v_skills.COUNT) := p_skill;
+
+    UPDATE Staff
+    SET skills = v_skills
+    WHERE s_id = p_id;
+
+    DBMS_OUTPUT.PUT_LINE('Skill added: ' || p_skill);
+END;
+/
+
+EXEC add_staff_skill(1,'Python');
+
+
+*************delete**********************
+CREATE OR REPLACE PROCEDURE delete_staff_skill(
+    p_id   IN NUMBER,
+    p_pos  IN NUMBER
+) IS
+    v_skills skillList;
+BEGIN
+    SELECT skills INTO v_skills
+    FROM Staff
+    WHERE s_id = p_id;
+
+    IF v_skills IS NOT NULL AND p_pos BETWEEN 1 AND v_skills.COUNT THEN
+        v_skills.DELETE(p_pos);
+
+        UPDATE Staff
+        SET skills = v_skills
+        WHERE s_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Deleted skill at position ' || p_pos);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot delete.');
+    END IF;
+
+END;
+/
+
+EXEC delete_staff_skill(1,2);
+
+
+****************update *******************
+CREATE OR REPLACE PROCEDURE update_staff_skill(
+    p_id       IN NUMBER,
+    p_pos      IN NUMBER,
+    p_skill    IN VARCHAR2
+) IS
+    v_skills skillList;
+BEGIN
+    SELECT skills INTO v_skills
+    FROM Staff
+    WHERE s_id = p_id;
+
+    IF v_skills IS NOT NULL AND p_pos BETWEEN 1 AND v_skills.COUNT THEN
+        v_skills(p_pos) := p_skill;
+
+        UPDATE Staff
+        SET skills = v_skills
+        WHERE s_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Updated skill at position ' || p_pos);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot update.');
+    END IF;
+
+END;
+/
+
+EXEC update_staff_skill(1,1,'Microservices');
+
+
+
+COLUMN S_ID FORMAT 9999
+COLUMN S_NAME FORMAT A30
+COLUMN SKILLS FORMAT A50;
+
+SELECT * FROM Staff;
+
+
+    
