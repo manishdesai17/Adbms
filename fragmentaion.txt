@@ -1,0 +1,125 @@
+SET LINESIZE 150
+SET PAGESIZE 50
+
+COLUMN tablespace_name      FORMAT A20
+COLUMN free_extents         FORMAT 9999
+COLUMN max_free_mb          FORMAT 99990.99
+COLUMN total_free_mb        FORMAT 999990.99
+COLUMN total_free_blocks    FORMAT 9999999
+
+COLUMN table_name    FORMAT A20
+COLUMN num_rows      FORMAT 999999
+COLUMN blocks        FORMAT 9999
+COLUMN empty_blocks  FORMAT 9999
+
+****************************************tablespace level
+
+Q1=SELECT tablespace_name,
+       COUNT(*) AS free_extents,
+       MAX(bytes)/1024/1024 AS max_free_mb,
+       SUM(bytes)/1024/1024 AS total_free_mb,
+        SUM(blocks) AS total_free_blocks
+FROM dba_free_space
+GROUP BY tablespace_name;
+
+
+***************************************Largest Free Blocks per Tablespace
+
+Q=2 SELECT 
+    fs.TABLESPACE_NAME,
+    MAX(fs.BLOCKS) AS LARGEST_FREE_BLOCKS
+FROM 
+    DBA_FREE_SPACE fs
+GROUP BY 
+    fs.TABLESPACE_NAME;
+
+
+***********************************table level
+
+Q=3
+CREATE TABLE HOSTEL (
+    room_id NUMBER,
+    student_name VARCHAR2(100)
+) TABLESPACE STUDENT;
+
+
+BEGIN
+  FOR i IN 1..10000 LOOP
+    INSERT INTO HOSTEL VALUES (i, 'Student Name ' || i);
+  END LOOP;
+  COMMIT;
+END;
+/
+
+
+DELETE FROM HOSTEL WHERE room_id <= 8000;
+COMMIT;
+
+
+SELECT
+  table_name,
+  blocks,
+  empty_blocks,
+  ROUND((empty_blocks / blocks) * 100, 2) AS pct_empty_blocks
+FROM
+  user_tables
+WHERE
+  table_name = 'HOSTEL' AND empty_blocks > 0
+ORDER BY
+  pct_empty_blocks DESC;
+
+Update in table chian rows**********************
+CREATE TABLE MYEMPLOYEES (
+    emp_id NUMBER PRIMARY KEY,
+    description VARCHAR2(2000) 
+)
+PCTFREE 0
+STORAGE (
+    INITIAL 64K
+    NEXT 64K
+    MINEXTENTS 1
+    MAXEXTENTS UNLIMITED
+    PCTINCREASE 0
+);
+
+BEGIN
+  FOR i IN 1..1000 LOOP
+    INSERT INTO MYEMPLOYEES VALUES (i, RPAD('Data', 10, '*'));
+  END LOOP;
+ 
+END;
+/
+
+
+
+@?/rdbms/admin/utlchain.sql
+
+
+EXEC DBMS_STATS.GATHER_TABLE_STATS('MCA5', 'MYEMPLOYEES');
+
+UPDATE MYEMPLOYEES SET description = RPAD('Large description for employee ' || emp_id || ': ', 1999, 'a');
+
+ANALYZE TABLE myemployees LIST CHAINED ROWS INTO chained_rows;
+
+SET LINESIZE 200
+COLUMN owner_name FORMAT A15
+COLUMN table_name FORMAT A20
+COLUMN head_rowid FORMAT A20
+COLUMN analyzed_on FORMAT A30
+
+
+SELECT owner_name,
+       table_name,
+       head_rowid,
+       TO_CHAR(analyze_timestamp, 'DD-MON-YYYY HH24:MI:SS') AS analyzed_on
+FROM chained_rows
+WHERE table_name = 'MYEMPLOYEES';
+
+
+**************************Count **********************************
+SELECT COUNT(*) AS chained_row_count
+FROM chained_rows
+WHERE table_name = 'MYEMPLOYEES';
+
+
+
