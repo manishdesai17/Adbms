@@ -1,0 +1,48 @@
+************lock output***********
+SQL> desc student;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ ID                                        NOT NULL NUMBER(10)
+ NAME                                               VARCHAR2(10)
+ CITY                                               VARCHAR2(10)
+
+
+
+
+SQL> select * from student where id=1
+     for update;
+
+         ID     NAME       CITY
+        --- ---------- ----------
+         1      Lipi       abad
+
+
+commit/rollback
+
+lock table student in EXCLUSIVE MODE;
+
+SQL> select * from student where id=1
+     for update;
+
+
+SQL> UPDATE student SET name = 'Praveen' WHERE id = 1;
+
+COLUMN SID FORMAT 999
+COLUMN SERIAL# FORMAT 999
+COLUMN USERNAME FORMAT A10
+COLUMN OBJECT_NAME FORMAT A15
+COLUMN LOCK_TYPE FORMAT A5
+COLUMN MODE_HELD FORMAT 999
+COLUMN MODE_REQUESTED FORMAT 999
+
+SELECT s.sid,
+       s.serial#,
+       s.username,
+       o.object_name,
+       l.type AS lock_type,
+       l.lmode AS mode_held,
+       l.request AS mode_requested
+FROM   v$lock l
+JOIN   v$session s ON l.sid = s.sid
+LEFT JOIN dba_objects o ON l.id1 = o.object_id
+where s.username='MCA5';

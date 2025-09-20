@@ -1,0 +1,74 @@
+SUMMARY
+Languages: Gujarati (Fluent) | Hindi (Fluent) | English (Intermediate)
+Certifications: Led the management team for a college hackathon at Gujarat Vidyapith, sponsored by Odoo
+Bachelor of Computer Applications (BCA)
+Smt. B.K. Mehta IT Centre, Palanpur   |    2021 – 2024
+Master of Computer Applications (MCA)
+Gujarat Vidyapith, Ahmedabad | 2024 – 2026 (Currently in Sem 3)
+1. Hackathon Management System (MCA Sem 3 – Ongoing)
+Developed a platform for organizing hackathons with admin, judge, and participant roles.
+Tech Used: Java ,  Springboot , Hibernate,, HTML , CSS , Ajax, MySQL, JavaScript,Jquery
+I am currently pursuing my MCA at Gujarat Vidyapith, Ahmedabad. Skilled in Java, Spring Boot,     Hibernate, and JSP/Servlets, with hands-on experience in building dynamic web applications. Learning advanced concepts in computer applications and programming.
+Manish  p. desai
+Ahmedabad, Gujarat   |   manishdesai557@gmail.com   |   9328304561    |    linkedin.com/in/manishdesai17
+Java developer
+technical skills
+Projects
+education
+additional information
+Programming Languages: Java
+Backend Technologies: Spring Boot, Hibernate, JSP, Servlets
+Frontend Basics: HTML, CSS, JavaScript, Bootstrap
+Database: MySQL
+2. Online Photographer Hiring System (MCA Sem 2)
+Enabled users to hire photographers and manage bookings.
+Tech Used: Java, JSP, Servlets, MySQL, jQuery.
+3. Public Day-Book (BCA Final Project)
+Enabled users to hire photographers and manage bookings.
+Tech Used: Java, JSP, Servlets, MySQL, jQuery.
+
+
+Project Progress Report
+Project Name
+Hackathon Management System
+Your Name
+Manish Desai
+Gujarat vidyapith
+[Date: August 19, 2025]
+1. What’s the Project?
+This project is a web application to manage hackathons, allowing users to register, admins to organize events, and judges to evaluate projects.
+2. What I Did
+•	Finished backend for user side (registration, team formation, Add hackathon). 
+•	Completed backend for admin side (Show all hackathons, show all teams, Show winner team, Send pass email, Send certificate email). 
+•	Finished backend for judge side (project evaluation, select teams, select win teams). 
+•	Completed frontend for user side (pages like View all hackathon, view hackathon, registration).
+3. What I’m Doing Now
+•	Starting frontend for user side (in progress). 
+•	Starting frontend for judge side (in progress).
+•	Starting frontend for admin side (in progress).
+4. Problems
+•	Login security is taking longer due to learning authentication setup.
+7. Summary
+The project is moving forward with most backend work done and user frontend complete. I’m working on security and other frontends to finish soon.
+
+like step by step day by day with date
+day 1  create packages like controller,dto,model,servies,reposatory work 1 day 
+day 2 create all model like hakcathon,teams,teamsMemberName,project,winTeams work 2 day
+day 3 create controlle HackathonController work 5 day
+day 4 create controller adminController work 6 day
+day 5 create controller teamController work 4 day
+day 6 create controller judge conteoller work 2 day
+day 7 start froentend  set html,css,javascript, images folder
+day 8 connect froentend with backend ,index , show_add_hackathon,show perticuter hackathon 
+
+this is complate work 
+
+=>continues work 
+registration page 
+admin side froentend
+
+=>pending work
+login security
+and froent end other like judge site ,user profile ,login form etc not complate it pending
+
+create exce file

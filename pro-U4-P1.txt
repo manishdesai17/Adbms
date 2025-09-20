@@ -1,0 +1,1 @@
+sqlldr mca5/mcauser@orcl19 control=mystudent.ctl log=mystudents.log bad=mystudents.bad

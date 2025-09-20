@@ -1,0 +1,41 @@
+//show hackahtons code
+//$(document).ready(function () {
+//    $.ajax({
+//        url: '/getAllHackathon',
+//        method: 'GET',
+//        success: function (data) {
+//            if (data.length > 0) {
+//                const first = data[0];
+//                const imagePath = "/images/" + first.image;
+//                $('#hackathon_template #hackathon_name').text(first.name);
+//                $('#hackathon_template #hackathon_date').text(first.hackathonDate);
+//                $('#hackathon_template #hackathon_location').text(first.location);
+//                $('#hackathon_template #hackathon_mode').text(first.hackathonMode);
+//                $('#hackathon_template #hackathon_img').attr('src', imagePath);
+//                $('#hackathon_template').attr('data-id', first.id);
+//                for (let i = 1; i < data.length; i++) {
+//                    let hackathon = data[i];
+//                    let newCard = $('#hackathon_template').clone();
+//                    newCard.find('#hackathon_name').text(hackathon.name);
+//                    newCard.find('#hackathon_date').text(hackathon.hackathonDate);
+//                    newCard.find('#hackathon_location').text(hackathon.location);
+//                    newCard.find('#hackathon_mode').text(hackathon.hackathonMode);
+//                    let imgpath = "images/" + hackathon.image;
+//                    newCard.find('#hackathon_img').attr('src', imgpath);
+//                    newCard.attr('data-id', hackathon.id);
+//                    newCard.removeAttr('id');
+//                    $('#hackathon_list').append(newCard);
+//                }
+//            } else {
+//                $('#hackathon_list').html("<p>No hackathons found.</p>");
+//            }
+//        },
+//        error: function (err) {
+//            console.error("Error loading data", err);
+//        }
+//    });
+//    $(document).on('click', '.view-btn', function () {
+//        let hackathonId = $(this).data('id');
+//        console.log(hackathonId);
+//    });
+//});

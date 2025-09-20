@@ -1,0 +1,62 @@
+
+Connected to: Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+Export done in WE8MSWIN1252 character set and AL16UTF16 NCHAR character set
+server uses AL32UTF8 character set (possible charset conversion)
+
+About to export specified users ...
+. exporting pre-schema procedural objects and actions
+. exporting foreign function library names for user MCA5 
+. exporting PUBLIC type synonyms
+. exporting private type synonyms
+. exporting object type definitions for user MCA5 
+About to export MCA5's objects ...
+. exporting database links
+. exporting sequence numbers
+. exporting cluster definitions
+. about to export MCA5's tables via Conventional Path ...
+. . exporting table                         COURSE         13 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                  COURSECONTENT
+. . exporting partition                CC_JAN_JUN_2025          1 rows exported
+. . exporting partition                CC_JUL_DEC_2025          2 rows exported
+. . exporting partition                      CC_FUTURE          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table                        COURSES          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                     COURSESELL          3 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                     DEPARTMENT          1 rows exported
+EXP-00091: Exporting questionable statistics.
+. . exporting table                      MYSTUDENT          3 rows exported
+. . exporting table                        STUDENT          4 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                       STUDENTS          2 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. . exporting table                        TEACHER          2 rows exported
+. . exporting table                    MOBILE_LIST          3 rows exported
+. . exporting table                          USERS          5 rows exported
+EXP-00091: Exporting questionable statistics.
+EXP-00091: Exporting questionable statistics.
+. exporting synonyms
+. exporting views
+. exporting stored procedures
+. exporting operators
+. exporting referential integrity constraints
+. exporting triggers
+. exporting indextypes
+. exporting bitmap, functional and extensible indexes
+. exporting posttables actions
+. exporting materialized views
+. exporting snapshot logs
+. exporting job queues
+. exporting refresh groups and children
+. exporting dimensions
+. exporting post-schema procedural objects and actions
+. exporting statistics
+Export terminated successfully with warnings.

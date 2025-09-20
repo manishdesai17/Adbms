@@ -1,0 +1,634 @@
+Online Course selling system 
+
+used database object created ******
+- table 
+- constraint
+- sequence
+- index 
+- cluster
+- trigger
+
+
+
+
+***********************************************************************************************Tables********************************************************************************
+
+SQL> desc course;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ COURSE_ID                                 NOT NULL NUMBER(10)
+ COURSE_NAME                                        VARCHAR2(10)
+ COURSE_DESC                                        VARCHAR2(100)
+ COURSE_DURATION                                    VARCHAR2(50)
+ COURSE_START_DATE                                  DATE
+ COURSE_END_DATE                                    DATE
+ COURSE_PRICE                                       NUMBER(10,2)                                   
+
+
+SQL> desc users;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ USER_ID                                   NOT NULL NUMBER(10)
+ USER_NAME                                          VARCHAR2(10)
+ USER_CITY                                          VARCHAR2(10)
+ USER_ADDRESS                                       VARCHAR2(50)
+ USER_EMAIL                                         VARCHAR2(30)
+ USER_PASSWORD                                      VARCHAR2(20)
+
+SQL> desc courseSell;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ COURSESELL_ID                             NOT NULL NUMBER(10)
+ COURSE_ID                                          NUMBER(10)
+ USER_ID                                            NUMBER(10)
+
+SQL> desc courseContent;
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+ COURSECONTENT_ID                          NOT NULL NUMBER(10)
+ COURSECONTENT_TYPE                                 VARCHAR2(50)
+ COURSECONTENT_URL                                  VARCHAR2(100)
+ COURSE_ID                                          NUMBER(10)
+
+
+
+**************************************************************************************sequence*****************************************************************************************
+SQL> create sequence COURSE_SEQ
+     start with 1;
+
+ Sequence created.
+
+SQL> create sequence user_seq
+  2  start with 101;
+
+Sequence created.
+
+SQL> create sequence courseSell_seq
+   start with 1;
+
+Sequence created.
+
+SQL>CREATE SEQUENCE seq_courseContent START WITH 1 INCREMENT BY 1;
+
+
+Sequence created.
+
+ create sequence coursePayment_seq
+  2  start with 1;
+
+
+
+ SELECT last_number
+   FROM user_sequences
+   WHERE sequence_name = 'COURSE_SEQ';
+********************************************************************************************* INDEX  **************************************************************************************
+=====================Course========================
+
+SQL> create index course_start_date on course(course_start_date);
+
+Index created.
+
+=================User========================
+SQL> create index user_email on users(user email);
+
+Index created.
+
+Why need to create index insert data in course 
+================= Create cluster index=================== 
+CREATE INDEX course_cluster_in
+ON CLUSTER COURSE_CLUSTER;
+
+
+
+
+*********************************************************************************************Insert Data ********************************************************************************
+
+=================Course data ===================
+INSERT INTO course (
+   course_name, course_desc,
+  course_duration, course_start_date, course_end_date, course_price
+)
+VALUES (
+   'Java', 'Core Java Programming',
+  '30 days',
+  TO_DATE('01-09-2025', 'DD-MM-YYYY'),
+  TO_DATE('30-09-2025', 'DD-MM-YYYY'),
+  4999.00
+);
+
+================== User data =================
+SQL> INSERT INTO users (
+  2    user_name, user_city, user_address,
+  3    user_email, user_password
+  4  ) VALUES (
+  5    'Manish', 'Surat', '123 Street',
+  6    'manish@gmail.com', 'pass123'
+  7  );
+
+================CourseSell================
+INSERT INTO courseSell (course_id, user_id)
+VALUES (2, 101);
+
+
+
+INSERT INTO courseContent (courseContent_type, courseContent_url, course_id)
+VALUES ('Video', 'https://example.com/java-intro', 2);
+
+INSERT INTO courseContent (courseContent_type, courseContent_url, course_id)
+VALUES ('PDF', 'https://example.com/java-notes.pdf', 2);
+
+INSERT INTO courseContent (courseContent_type, courseContent_url, course_id)
+VALUES ('Quiz', 'https://example.com/java-quiz', 2);
+
+INSERT INTO courseContent (courseContent_type, courseContent_url, course_id)
+VALUES ('Article', 'https://example.com/python-article', 3);
+
+INSERT INTO courseContent (courseContent_type, courseContent_url, course_id)
+VALUES ('Video', 'https://example.com/python-basics', 3);
+
+
+courseContent
+INSERT INTO COURSECONTENT (
+    COURSECONTENT_TYPE,
+    COURSECONTENT_URL,
+    COURSE_ID,
+    ADDDATE
+) VALUES (
+    'Video',
+    'https://example.com/content/intro-to-java.mp4',
+    2,
+    TO_DATE('2025-08-06', 'YYYY-MM-DD')
+);
+
+*****************************************************************************************Format Column ******************************************************************************
+=======Course table=========
+SET LINESIZE 200
+SET PAGESIZE 50
+COLUMN COURSE_NAME FORMAT A20
+COLUMN COURSE_DESC FORMAT A40
+COLUMN COURSE_DURATION FORMAT A15
+COLUMN COURSE_START FORMAT A12
+COLUMN COURSE_END_D FORMAT A12
+COLUMN COURSE_PRICE FORMAT 9999999.99
+=========Users ===============
+SET LINESIZE 200
+COLUMN user_id        FORMAT 999
+COLUMN user_name      FORMAT A15
+COLUMN user_city      FORMAT A15
+COLUMN user_address   FORMAT A30
+COLUMN user_email     FORMAT A30
+COLUMN user_password  FORMAT A15
+
+
+=======courseCOntent=====
+COLUMN coursecontent_id    FORMAT 999
+COLUMN coursecontent_type  FORMAT A20
+COLUMN coursecontent_url   FORMAT A50
+COLUMN course_id           FORMAT 999
+COLUMN adddate             FORMAT A15
+
+
+
+
+************************************************************************************************Trigger ********************************************************************************
+============User======================
+CREATE OR REPLACE TRIGGER user_trigger
+BEFORE INSERT ON users
+FOR EACH ROW
+BEGIN
+  IF :NEW.user_id IS NULL THEN
+    :NEW.user_id := user_seq.NEXTVAL;
+  END IF;
+END;
+/
+
+
+*******************************************************************************************Trigger for course selection ********************************************************************
+
+=========trigger on courseSell table================
+//check that user not buy again that course
+
+CREATE OR REPLACE TRIGGER uniqueCourse
+BEFORE INSERT ON courseSell
+FOR EACH ROW
+DECLARE
+  existCount NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO existCount
+  FROM courseSell
+  WHERE course_id = :NEW.course_id AND user_id = :NEW.user_id;
+
+  IF existCount > 0 THEN
+    RAISE_APPLICATION_ERROR(-20001, 'You already bought this course.');
+  END IF;
+END;
+/
+
+
+************************************************************************************************PACKAGE ********************************************************************************
+================== create package =========================
+CREATE OR REPLACE PACKAGE courseOperation AS
+
+  PROCEDURE show_courses;
+
+  FUNCTION get_user_buycourse(u_course_id NUMBER) RETURN NUMBER;
+
+END courseOperation;
+/
+
+================== create package body =========================
+ CREATE OR REPLACE PACKAGE BODY courseOperation AS
+
+
+  PROCEDURE show_courses IS
+  BEGIN
+    FOR rec IN (
+      SELECT course_id, course_name, course_desc, course_duration,
+             course_start_date, course_end_date, course_price
+      FROM course
+    ) LOOP
+      DBMS_OUTPUT.PUT_LINE('Course ID     : ' || rec.course_id);
+      DBMS_OUTPUT.PUT_LINE('Name          : ' || rec.course_name);
+      DBMS_OUTPUT.PUT_LINE('Description   : ' || rec.course_desc);
+      DBMS_OUTPUT.PUT_LINE('Duration      : ' || rec.course_duration);
+      DBMS_OUTPUT.PUT_LINE('Start Date    : ' || TO_CHAR(rec.course_start_date, 'DD-MON-YYYY'));
+      DBMS_OUTPUT.PUT_LINE('End Date      : ' || TO_CHAR(rec.course_end_date, 'DD-MON-YYYY'));
+      DBMS_OUTPUT.PUT_LINE('Price (Rs.)   : ' || TO_CHAR(rec.course_price, '9999.99'));
+      DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+    END LOOP;
+  END show_courses;
+
+
+  FUNCTION get_user_buycourse(u_course_id NUMBER) RETURN NUMBER IS
+    user_count NUMBER;
+  BEGIN
+    SELECT COUNT(user_id) INTO user_count
+    FROM courseSell
+    WHERE course_id = u_course_id;
+
+    RETURN user_count;
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      RETURN 0;
+  END get_user_buycourse;
+
+
+********************************************************************************************Call Function ********************************************************************************
+SELECT courseOperation.get_user_buycourse(2) FROM dual;
+
+********************************************************************************************Call procedure ********************************************************************************
+SET SERVEROUTPUT ON;
+  begin
+ courseOperation.show_courses;
+ end;
+/
+
+
+
+
+
+**************************************************************************************** Create PROCEDURE *********************************************************************************
+=========course insert =============
+
+CREATE OR REPLACE PROCEDURE course_insert (
+    c_name        VARCHAR2,
+    c_desc        VARCHAR2,
+    c_duration    VARCHAR2,
+    c_start_date  DATE,
+    c_end_date    DATE,
+    c_price       NUMBER
+)
+AS
+BEGIN
+    INSERT INTO course (
+        course_name,
+        course_desc,
+        course_duration,
+        course_start_date,
+        course_end_date,
+        course_price
+    )
+    VALUES (
+        c_name,
+        c_desc,
+        c_duration,
+        c_start_date,
+        c_end_date,
+        c_price
+    );
+
+    COMMIT;
+END;
+/
+
+QUERY========exec course_insert('.Net ','This is .net language','2 months',TO_DATE('15-08-2025', 'DD-MM-YYYY'),TO_DATE('15-08-2025', 'DD-MM-YYYY'),3000);
+
+============User insert============
+
+CREATE OR REPLACE PROCEDURE user_insert (
+    u_name      VARCHAR2,
+    u_city      VARCHAR2,
+    u_address   VARCHAR2,
+    u_email     VARCHAR2,
+    u_password  VARCHAR2
+)
+AS
+BEGIN
+    INSERT INTO users (
+        user_name,
+        user_city,
+        user_address,
+        user_email,
+        user_password
+    )
+    VALUES ( 
+        u_name,
+        u_city,
+        u_address,
+        u_email,
+        u_password
+    );
+
+    COMMIT;
+END;
+/
+
+QUERY=======
+
+
+=======courseContent==========
+
+CREATE OR REPLACE PROCEDURE courseContent_insert (
+    p_course_id    IN NUMBER,
+    p_desc         IN VARCHAR2,
+    p_adddate      IN DATE,
+    p_url          IN VARCHAR2
+)
+AS
+BEGIN
+    INSERT INTO courseContent (
+       
+        course_id,
+        content_desc,
+        adddate,
+        url
+    )
+    VALUES (
+        p_course_id,
+        p_desc,
+        p_adddate,
+        p_url
+    );
+    
+    DBMS_OUTPUT.PUT_LINE('Record inserted successfully.');
+END;
+/
+
+QUERY===========
+begin
+ courseContent_insert('PDF','https://example.com/java-guide.pdf',3,TO_DATE('15-08-2025','DD-MM-YYYY'));
+end;
+/
+
+
+
+
+==========course Sell============
+CREATE OR REPLACE PROCEDURE courseSell_insert (
+    p_course_id NUMBER,
+    p_user_id   NUMBER
+)
+AS
+BEGIN
+    INSERT INTO courseSell (
+        course_id,
+        user_id
+    )
+    VALUES (	
+        p_course_id,
+        p_user_id
+    );
+
+    COMMIT;
+END;
+/
+query======
+begin
+ courseSell_insert(21, 50);
+end;
+/
+
+
+   /
+CREATE TABLE coursePayment (
+  payment_id   NUMBER(10) CONSTRAINT coursePayment_pk PRIMARY KEY,
+  course_id    NUMBER(10),
+  user_id      NUMBER(10),
+  price        NUMBER(10,2),
+  CONSTRAINT fk_coursePayment_course FOREIGN KEY (course_id)
+    REFERENCES course(course_id),  
+  CONSTRAINT fk_coursePayment_user FOREIGN KEY (user_id)
+    REFERENCES users(user_id))
+storage( INITIAL 5K NEXT 10K);
+/
+
+*********************************************************************************************************view *************************************************************************
+create view courseDetail as 
+select 
+    course.course_name, 
+    course.course_price, 
+    COUNT(courseSell.user_id) AS total_buyers,
+    SUM(course.course_price) AS total_revenue
+from 
+    course
+join 
+    courseSell ON course.course_id = courseSell.course_id
+group by 
+    course.course_name, course.course_price;
+
+
+
+
+
+***********************************************************new procedure with curser****************************************************************************************
+
+
+CREATE OR REPLACE PROCEDURE show_courseContent IS
+    CURSOR c_content IS
+        SELECT courseContent_id, courseContent_type, courseContent_url, course_id
+        FROM courseContent;
+    v_content_id   courseContent.courseContent_id%TYPE;
+    v_content_type courseContent.courseContent_type%TYPE;
+    v_content_url  courseContent.courseContent_url%TYPE;
+    v_course_id    courseContent.course_id%TYPE;
+BEGIN
+    OPEN c_content;
+    LOOP
+        FETCH c_content INTO v_content_id, v_content_type, v_content_url, v_course_id;
+        EXIT WHEN c_content%NOTFOUND;
+
+        DBMS_OUTPUT.PUT_LINE('Content ID   : ' || v_content_id);
+        DBMS_OUTPUT.PUT_LINE('Type         : ' || v_content_type);
+        DBMS_OUTPUT.PUT_LINE('URL          : ' || v_content_url);
+        DBMS_OUTPUT.PUT_LINE('Course ID    : ' || v_course_id);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+    END LOOP;
+    CLOSE c_content;
+END show_courseContent;
+/
+
+
+
+
+
+
+************************report************************
+
+CREATE OR REPLACE PROCEDURE get_course_detail IS
+   
+    CURSOR course_cursor IS
+        SELECT
+            c.course_name,
+            c.course_price,
+            COUNT(cs.user_id) AS total_buyers,
+            COUNT(cs.user_id) * c.course_price AS total_revenue
+        FROM
+            course c
+            LEFT JOIN courseSell cs ON c.course_id = cs.course_id
+        GROUP BY
+            c.course_name, c.course_price;
+
+   
+    v_course_name   course.course_name%TYPE;
+    v_course_price  course.course_price%TYPE;
+    v_total_buyers  NUMBER;
+    v_total_revenue NUMBER;
+
+BEGIN
+  
+    OPEN course_cursor;
+
+   
+    LOOP
+        FETCH course_cursor
+        INTO v_course_name, v_course_price, v_total_buyers, v_total_revenue;
+
+        EXIT WHEN course_cursor%NOTFOUND;
+
+      
+        DBMS_OUTPUT.PUT_LINE('Course Name   : ' || v_course_name);
+        DBMS_OUTPUT.PUT_LINE('Course Price  : ' || v_course_price);
+        DBMS_OUTPUT.PUT_LINE('Total Buyers  : ' || v_total_buyers);
+        DBMS_OUTPUT.PUT_LINE('Total Revenue : ' || v_total_revenue);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+    END LOOP;
+
+  
+    CLOSE course_cursor;
+END get_course_detail;
+/
+
+
+CREATE OR REPLACE PROCEDURE show_users IS
+BEGIN
+    FOR rec IN (
+        SELECT user_id, user_name, user_city, user_address, user_email, user_password
+        FROM users
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('User ID    : ' || rec.user_id);
+        DBMS_OUTPUT.PUT_LINE('Name       : ' || rec.user_name);
+        DBMS_OUTPUT.PUT_LINE('City       : ' || rec.user_city);
+        DBMS_OUTPUT.PUT_LINE('Address    : ' || rec.user_address);
+        DBMS_OUTPUT.PUT_LINE('Email      : ' || rec.user_email);
+        DBMS_OUTPUT.PUT_LINE('Password   : ' || rec.user_password);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+    END LOOP;
+END show_users;
+/
+
+
+
+CREATE OR REPLACE PROCEDURE show_courseSell IS
+BEGIN
+    FOR rec IN (
+        SELECT courseSell_id, course_id, user_id
+        FROM courseSell
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('CourseSell ID : ' || rec.courseSell_id);
+        DBMS_OUTPUT.PUT_LINE('Course ID     : ' || rec.course_id);
+        DBMS_OUTPUT.PUT_LINE('User ID       : ' || rec.user_id);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+    END LOOP;
+END show_courseSell;
+/
+
+
+CREATE OR REPLACE PROCEDURE show_courseContent IS
+BEGIN
+    FOR rec IN (
+        SELECT content_id, content_desc, adddate, url, course_id
+        FROM courseContent
+    ) LOOP
+        DBMS_OUTPUT.PUT_LINE('Content ID   : ' || rec.content_id);
+        DBMS_OUTPUT.PUT_LINE('Description  : ' || rec.content_desc);
+        DBMS_OUTPUT.PUT_LINE('Added Date   : ' || TO_CHAR(rec.adddate, 'DD-MON-YYYY'));
+        DBMS_OUTPUT.PUT_LINE('URL          : ' || rec.url);
+        DBMS_OUTPUT.PUT_LINE('Course ID    : ' || rec.course_id);
+        DBMS_OUTPUT.PUT_LINE('-------------------------------------------');
+    END LOOP;
+END show_courseContent;
+/
+
+
+
+
+BEGIN
+    
+    show_users;
+    
+END;
+/
+
+BEGIN
+  
+    show_courseSell;
+  
+END;
+/
+
+BEGIN
+    show_courseContent;
+END;
+/
+
+
+
+
+
+******************************************************partition create*******************************************************
+
+CREATE TABLE courseContent (
+    content_id    NUMBER PRIMARY KEY,
+    course_id     NUMBER REFERENCES course(course_id),
+    content_desc  VARCHAR2(200),
+    ADDDATE       DATE DEFAULT SYSDATE
+)
+PARTITION BY RANGE (ADDDATE) (
+    PARTITION cc_jan_jun_2025 
+        VALUES LESS THAN (DATE '2025-07-01') 
+        TABLESPACE stud,
+
+    PARTITION cc_jul_dec_2025 
+        VALUES LESS THAN (DATE '2026-01-01') 
+        TABLESPACE student,
+
+    PARTITION cc_future 
+        VALUES LESS THAN (MAXVALUE) 
+        TABLESPACE stud
+)
+
+
+
+/
+
+

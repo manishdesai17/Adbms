@@ -40,7 +40,7 @@ Q=3
 CREATE TABLE HOSTEL (
     room_id NUMBER,
     student_name VARCHAR2(100)
-) TABLESPACE STUDENT;
+) TABLESPACE stud;
 
 
 BEGIN

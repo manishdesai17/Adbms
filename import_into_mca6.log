@@ -1,0 +1,87 @@
+
+Connected to: Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production
+Version 19.3.0.0.0
+
+Export file created by EXPORT:V19.00.00 via conventional path
+
+Warning: the objects were exported by MCA5, not by you
+
+import done in WE8MSWIN1252 character set and AL16UTF16 NCHAR character set
+import server uses AL32UTF8 character set (possible charset conversion)
+IMP-00403: 
+
+Warning: This import generated a separate SQL file "import_into_mca6_sys.sql" which contains DDL that failed due to a privilege issue.
+
+IMP-00017: following statement failed with ORACLE error 2304:
+ "CREATE TYPE "COURSE_LIST" TIMESTAMP '2025-08-25:09:04:13' OID '932CC8056AA1"
+ "495DA5E736D7C1C26671'   AS TABLE OF VARCHAR2(50);"
+IMP-00003: ORACLE error 2304 encountered
+ORA-02304: invalid object identifier literal
+IMP-00017: following statement failed with ORACLE error 2304:
+ "CREATE TYPE "COURSELIST" TIMESTAMP '2025-09-06:11:54:23' OID 'BBC29D4212494"
+ "08FB10FEE3F1A0FA02F'   AS VARRAY(10) OF VARCHAR2(50);"
+IMP-00003: ORACLE error 2304 encountered
+ORA-02304: invalid object identifier literal
+IMP-00017: following statement failed with ORACLE error 2304:
+ "CREATE TYPE "MOBILES" TIMESTAMP '2025-09-06:12:00:38' OID '269FAD0DAFB643D6"
+ "BC0256549338C042'   is table of NUMBER;"
+IMP-00003: ORACLE error 2304 encountered
+ORA-02304: invalid object identifier literal
+. . importing table                       "COURSE"         13 rows imported
+. . importing partition "COURSECONTENT":"CC_JAN_JUN_2025"          1 rows imported
+. . importing partition "COURSECONTENT":"CC_JUL_DEC_2025"          2 rows imported
+. . importing partition    "COURSECONTENT":"CC_FUTURE"          1 rows imported
+. . importing table                      "COURSES"          2 rows imported
+. . importing table                   "COURSESELL"          3 rows imported
+IMP-00063: Warning: Skipping table "MCA6"."DEPARTMENT" because object type "MCA6"."COURSELIST" cannot be created or has different identifier
+. . importing table                    "MYSTUDENT"          3 rows imported
+. . importing table                      "STUDENT"          4 rows imported
+. . importing table                     "STUDENTS"          2 rows imported
+IMP-00063: Warning: Skipping table "MCA6"."TEACHER" because object type "MCA6"."MOBILES" cannot be created or has different identifier
+. . importing table                        "USERS"          5 rows imported
+IMP-00017: following statement failed with ORACLE error 942:
+ "CREATE TRIGGER "MCA6".dept_before_insert"
+ "BEFORE INSERT ON Department"
+ "FOR EACH ROW"
+ "BEGIN"
+ "    IF :NEW.d_id IS NULL THEN"
+ "        SELECT dept_seq.NEXTVAL INTO :NEW.d_id FROM dual;"
+ "    END IF;"
+ "END;"
+IMP-00003: ORACLE error 942 encountered
+ORA-00942: table or view does not exist
+IMP-00017: following statement failed with ORACLE error 942:
+ "CREATE TRIGGER "MCA6".teacher_before_insert"
+ "BEFORE INSERT ON Teacher"
+ "FOR EACH ROW"
+ "BEGIN"
+ "    IF :NEW.t_id IS NULL THEN"
+ "        SELECT teacher_seq.NEXTVAL INTO :NEW.t_id FROM dual;"
+ "    END IF;"
+ "END;"
+IMP-00003: ORACLE error 942 encountered
+ORA-00942: table or view does not exist
+IMP-00041: Warning: object created with compilation warnings
+ "CREATE TRIGGER "MCA6".trg_course_id"
+ "BEFORE INSERT ON courses"
+ "FOR EACH ROW"
+ "BEGIN"
+ "    :NEW.course_id := seq_course.NEXTVAL;"
+ "END;"
+IMP-00041: Warning: object created with compilation warnings
+ "CREATE TRIGGER "MCA6".trg_student_id"
+ "BEFORE INSERT ON students"
+ "FOR EACH ROW"
+ "BEGIN"
+ "    :NEW.student_id := seq_student.NEXTVAL;"
+ "END;"
+IMP-00017: following statement failed with ORACLE error 942:
+ "ANALYZE  TABLE "TEACHER"  ESTIMATE STATISTICS "
+IMP-00003: ORACLE error 942 encountered
+ORA-00942: table or view does not exist
+IMP-00017: following statement failed with ORACLE error 942:
+ "ANALYZE  TABLE "MOBILE_LIST"  ESTIMATE STATISTICS "
+IMP-00003: ORACLE error 942 encountered
+ORA-00942: table or view does not exist
+About to enable constraints...
+Import terminated successfully with warnings.

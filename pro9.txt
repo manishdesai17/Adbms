@@ -1,0 +1,190 @@
+******************Nested table**************
+create or replace type mobiles is table of NUMBER;
+
+
+****************table****************
+CREATE TABLE Teacher (
+    t_id   NUMBER PRIMARY KEY,
+    t_name VARCHAR2(50),
+    mobile mobiles
+)
+storage( INITIAL 5K NEXT 10K)
+ NESTED TABLE mobile STORE AS Mobile_List;
+
+
+***********sequence**************
+CREATE SEQUENCE teacher_seq
+START WITH 1
+INCREMENT BY 1;
+
+
+******************trigger*********************
+
+CREATE OR REPLACE TRIGGER teacher_before_insert
+BEFORE INSERT ON Teacher
+FOR EACH ROW
+BEGIN
+    IF :NEW.t_id IS NULL THEN
+        SELECT teacher_seq.NEXTVAL INTO :NEW.t_id FROM dual;
+    END IF;
+END;
+/
+
+
+***************insert**********************
+create or replace procedure insert_teacher(
+   name in varchar2,
+   phone in mobiles
+) as
+begin
+   insert into Teacher (t_name,mobile)
+   values(name,phone);
+   DBMS_OUTPUT.PUT_LINE('Teacher inserted successfully');
+end;
+/
+
+
+
+********************** Add perticuler mobile number***************************
+
+CREATE OR REPLACE PROCEDURE add_teacher_mobile(
+    p_id     IN NUMBER,
+    t_mobile IN NUMBER
+) IS
+   phone mobiles;  
+BEGIN
+    SELECT mobile INTO phone
+    FROM teacher
+    WHERE t_id = p_id;
+
+    phone.EXTEND;
+    phone(phone.COUNT) := t_mobile;
+
+    UPDATE teacher
+    SET mobile = phone
+    WHERE t_id = p_id;
+
+    DBMS_OUTPUT.PUT_LINE('Teacher mobile added: ' || t_mobile);
+END;
+/
+
+Exec add_teacher_mobile(1,9999888800);
+
+*************delete**********************
+CREATE OR REPLACE PROCEDURE delete_teacher_mobile(
+    p_id   IN NUMBER,
+    p_pos  IN NUMBER
+) IS
+    phone mobiles;
+BEGIN
+    SELECT mobile INTO phone
+    FROM teacher
+    WHERE t_id = p_id;
+
+    IF phone IS NOT NULL AND p_pos BETWEEN 1 AND phone.COUNT THEN
+        phone.DELETE(p_pos);
+
+        UPDATE teacher
+        SET mobile = phone
+        WHERE t_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Deleted mobile at position ' || p_pos);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot delete.');
+    END IF;
+
+END;
+/
+
+
+****************update *******************
+CREATE OR REPLACE PROCEDURE update_teacher_mobile(
+    p_id      IN NUMBER,
+    p_pos     IN NUMBER,
+    new_mobile IN NUMBER
+) IS
+    phone mobiles;
+BEGIN
+    SELECT mobile INTO phone
+    FROM teacher
+    WHERE t_id = p_id;
+
+    IF phone IS NOT NULL AND p_pos BETWEEN 1 AND phone.COUNT THEN
+        phone(p_pos) := new_mobile;
+
+        UPDATE teacher
+        SET mobile = phone
+        WHERE t_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Updated mobile at position ');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot update.');
+    END IF;
+
+END;
+/
+
+
+
+******************************************************************************Without extends********************************************************************************
+insert******
+CREATE OR REPLACE PROCEDURE add_teacher_mobile(
+    p_id     IN NUMBER,
+    p_mobile IN NUMBER
+) IS
+BEGIN
+    INSERT INTO TABLE (
+        SELECT mobile
+        FROM teacher
+        WHERE t_id = p_id
+    )
+    VALUES (p_mobile);
+
+    DBMS_OUTPUT.PUT_LINE('Teacher mobile added: ' || p_mobile || ' for teacher id ' || p_id);
+END;
+/
+
+delete*******
+CREATE OR REPLACE PROCEDURE delete_teacher_mobile(
+    p_id     IN NUMBER,
+    p_mobile IN NUMBER
+) IS
+BEGIN
+    DELETE FROM TABLE (
+        SELECT mobile
+        FROM teacher
+        WHERE t_id = p_id
+    )
+    WHERE COLUMN_VALUE = p_mobile;
+
+    DBMS_OUTPUT.PUT_LINE('Teacher mobile deleted: ' || p_mobile || ' for teacher id ' || p_id);
+END;
+/
+
+
+update *****
+CREATE OR REPLACE PROCEDURE update_teacher_mobile(
+    p_id       IN NUMBER,
+    p_old_mobile IN NUMBER,
+    p_new_mobile IN NUMBER
+) IS
+BEGIN
+    UPDATE TABLE (
+        SELECT mobile
+        FROM teacher
+        WHERE t_id = p_id
+    )
+    SET COLUMN_VALUE = p_new_mobile
+    WHERE COLUMN_VALUE = p_old_mobile;
+
+    DBMS_OUTPUT.PUT_LINE('Teacher mobile updated: ' || p_old_mobile || ' -> ' || p_new_mobile || ' for teacher id ' || p_id);
+END;
+/
+
+
+
+
+
+
+
+    

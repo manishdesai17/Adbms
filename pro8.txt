@@ -1,0 +1,168 @@
+*****************create type**********************
+
+CREATE OR REPLACE TYPE courseList AS VARRAY(10) OF VARCHAR2(50);
+
+*****************create table **********************
+
+CREATE TABLE Department (
+    d_id   NUMBER PRIMARY KEY,
+    d_name VARCHAR2(50),
+    courses      courseList
+);
+
+**************sequence**********************
+
+CREATE SEQUENCE dept_seq
+START WITH 1
+INCREMENT BY 1;
+
+
+******************trigger*********************
+
+CREATE OR REPLACE TRIGGER dept_before_insert
+BEFORE INSERT ON Department
+FOR EACH ROW
+BEGIN
+    IF :NEW.d_id IS NULL THEN
+        SELECT dept_seq.NEXTVAL INTO :NEW.d_id FROM dual;
+    END IF;
+END;
+/
+
+
+
+*******************  insert ***********************
+
+CREATE OR REPLACE PROCEDURE insert_department(
+    p_name    IN VARCHAR2,
+    p_courses IN courseList
+) AS
+BEGIN
+    INSERT INTO Department (d_name, courses)
+    VALUES (p_name, p_courses);
+
+    DBMS_OUTPUT.PUT_LINE('Department inserted successfully');
+END;
+/
+
+QUERY==exec insert_department('Computer Science',courseList('java','python'));
+
+
+********************** Add perticuler course***************************
+
+CREATE OR REPLACE PROCEDURE add_department_course(
+    p_id     IN NUMBER,
+    p_course IN VARCHAR2
+) IS
+    v_courses courseList;
+BEGIN
+    SELECT courses INTO v_courses
+    FROM Department
+    WHERE d_id = p_id;
+
+    v_courses.EXTEND;
+    v_courses(v_courses.COUNT) := p_course;
+
+    UPDATE Department
+    SET courses = v_courses
+    WHERE d_id = p_id;
+
+    DBMS_OUTPUT.PUT_LINE('Course added: ' || p_course);
+END;
+/
+
+
+
+********************  update  ********************
+CREATE OR REPLACE PROCEDURE update_department_course(
+    p_id   IN NUMBER,
+    p_pos  IN NUMBER,
+    p_name IN VARCHAR2
+) IS
+    v_courses courseList;
+BEGIN
+    SELECT courses INTO v_courses
+    FROM Department
+    WHERE d_id = p_id;
+
+    IF v_courses IS NOT NULL AND p_pos BETWEEN 1 AND v_courses.COUNT THEN
+        v_courses(p_pos) := p_name;
+
+        UPDATE Department
+        SET courses = v_courses
+        WHERE d_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Updated successfully ');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot update.');
+    END IF;
+END update_department_course;
+/
+
+
+QUERY==exec update_department_course(1,1,'c++');
+
+***************************delete ***********************
+
+CREATE OR REPLACE PROCEDURE delete_department_course(
+    p_id   IN NUMBER,
+    p_pos  IN NUMBER
+) IS
+    v_courses courseList;
+BEGIN
+    SELECT courses INTO v_courses
+    FROM Department
+    WHERE d_id = p_id;
+
+    IF v_courses IS NOT NULL AND p_pos BETWEEN 1 AND v_courses.COUNT THEN
+        FOR i IN p_pos .. v_courses.COUNT-1 LOOP
+            v_courses(i) := v_courses(i+1);
+        END LOOP;
+        v_courses.TRIM;
+       
+        UPDATE Department
+        SET courses = v_courses
+        WHERE d_id = p_id;
+
+        DBMS_OUTPUT.PUT_LINE('Deleted course at position ' || p_pos);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Invalid position! Cannot delete.');
+    END IF;
+END delete_department_course;
+/
+
+@Query ==exec delete_department_course(1,2);
+
+CREATE OR REPLACE PROCEDURE add_department_course1(
+    p_id     IN NUMBER,
+    p_course IN VARCHAR2
+) IS
+    v_courses courseList;
+BEGIN
+    SELECT courses INTO v_courses
+    FROM Department
+    WHERE d_id = p_id;
+
+    IF v_courses IS NULL THEN
+        v_courses := courseList();
+    END IF;
+
+    v_courses := v_courses || courseList(p_course);
+
+    UPDATE Department
+    SET courses = v_courses
+    WHERE d_id = p_id;
+
+    DBMS_OUTPUT.PUT_LINE('Course added: ' || p_course);
+END;
+
+
+
+
+ Format 
+COLUMN D_ID FORMAT 9999
+COLUMN D_NAME FORMAT A30
+COLUMN COURSES FORMAT A50
+
+
+
